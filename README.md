@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # cinema-ticket-sales
 Cinema ticket sales system's front end made with Angular.
 
@@ -12,3 +13,6 @@ Tested on Node.js verision 18.16.
 4. run `npm run backend:start` to start a mock backend server
 5. run `npm run ng serve -o` to start the angular app
 
+=======
+# CinemaApp
+>>>>>>> b291e8ce0b3f8fb330fe9cf155e83153e287d5cf
