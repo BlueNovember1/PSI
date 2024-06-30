@@ -1,0 +1,83 @@
+.seat-map {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.seat-map > .seat-row {
+  display: flex;
+  margin-bottom: 5px;
+}
+
+.seat {
+  width: 50px;
+  height: 50px;
+  background-color: #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 5px;
+  font-size: 16px;
+  border: 1px solid #000;
+}
+
+.seat.selected {
+  background-color: #4CAF50;
+}
+
+.seat.taken {
+  background-color: red;
+}
+
+.date-info {
+  font-size: 1rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.ticket-button {
+  background-color: #49525b; 
+  color: white; 
+  font-size: 1.25rem;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.ticket-button:hover {
+  background-color: #62768a;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.legend div {
+  display: flex;
+  align-items: center;
+  margin-right: 10px;
+}
+
+.legend .seat {
+  margin-right: 5px;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #000;
+}
+
+.screen {
+  width: calc(50px * 16);
+  height: 30px;
+  background-color: black;
+  color: white;
+  text-align: center;
+  line-height: 30px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}

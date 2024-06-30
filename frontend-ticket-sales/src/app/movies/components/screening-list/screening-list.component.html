@@ -1,0 +1,33 @@
+<article class="m-3">
+  <h2>List of Screenings</h2>
+
+  <div class="filters mb-3">
+    <label for="dateFromPicker">Date from:</label>
+    <input type="date" id="dateFromPicker" [(ngModel)]="selectedDateFrom" (change)="onDateChange()">
+
+    <label for="dateToPicker" class="ml-2">Date to:</label>
+    <input type="date" id="dateToPicker" [(ngModel)]="selectedDateTo" (change)="onDateChange()">
+
+    <label for="movieSelect" class="ml-2">Select Movie:</label>
+    <select id="movieSelect" [(ngModel)]="selectedMovieId" (change)="onMovieChange($event)">
+      <option [ngValue]="null">All Movies</option>
+      <option *ngFor="let movie of movies" [ngValue]="movie.id">{{ movie.title }}</option>
+    </select>
+  </div>
+
+  <section class="d-flex flex-column gap-2">
+    <div class="card mt-1" *ngFor="let screening of filteredScreenings">
+      <div class="card-body">
+        <h5 class="card-title">{{ screening.movie?.title }}</h5>
+        <p class="card-text m-0">Date: {{ formatDate(screening.dateOfBeginning) }}</p>
+        <p class="card-text m-0">Start: {{ formatTime(screening.dateOfBeginning) }}</p>
+        <p class="card-text m-0"> Length: {{ screening.movie?.lengthInMins }} min</p>
+        <p class="card-text"> Hall: {{ screening.cinemaHall?.name }}</p>
+
+
+        <button [routerLink]="['/movies', screening.movie?.id, 'details']" class="btn ticket-button m-1">Movie Details</button>
+        <button [routerLink]="['/screenings', screening.id]" class="btn ticket-button m-1">Get Tickets</button>
+      </div>
+    </div>
+  </section>
+</article>
