@@ -1,0 +1,29 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: cinema-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: cinema-db
+      MYSQL_USER: username
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - cinema-db:/var/lib/mysql
+      - ./src/main/resources/data.sql:/docker-entrypoint-initdb.d/data.sql
+  
+  # backend:
+  #   image: wilczekdocker/cinema-backend:latest
+  #   container_name: cinema-backend
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:mysql://cinema-db:3306/cinema-db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+  #     SPRING_DATASOURCE_USERNAME: username
+  #     SPRING_DATASOURCE_PASSWORD: password
+  #     SPRING_DATASOURCE_DRIVER-CLASS-NAME: com.mysql.cj.jdbc.Driver
+  #   ports:
+  #     - "8080:8080"
+  #   command: sh -c "sleep 15 && java -jar /app/backend-0.0.1-SNAPSHOT.jar"
+
+volumes:
+  cinema-db:
