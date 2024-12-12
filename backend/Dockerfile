@@ -3,9 +3,9 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline
 COPY src ./src
-RUN mvn package -DskipTests
+RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:22-jre
 WORKDIR /app
 COPY --from=build /app/target/backend-0.0.1-SNAPSHOT.jar .
-CMD ["java", "-jar", "backend-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "target/backend-0.0.1-SNAPSHOT.jar"]

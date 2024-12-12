@@ -4,7 +4,7 @@ export $(grep -v '^#' .env | xargs)
 
 DATE_TAG=$(date +%d-%m-%Y)
 # DATE_TAG="v1"
-IMAGE_NAME="cinema-backend"
+IMAGE_NAME="cinema-server"
 DOCKERHUB_USERNAME=$(echo $DOCKERHUB_USERNAME | tr -d '\r')
 
 if [ -z "$DOCKERHUB_USERNAME" ]; then

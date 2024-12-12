@@ -13,30 +13,26 @@ services:
       - cinema-db:/var/lib/mysql
       # - ./mysql_backup.sql:/docker-entrypoint-initdb.d/data.sql
 
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   container_name: pgadmin4_container
-  #   restart: always
-  #   ports:
-  #     - "8888:80"
-  #   environment:
-  #     PGADMIN_DEFAULT_EMAIL: wilczek@local.com
-  #     PGADMIN_DEFAULT_PASSWORD: password
-  #   volumes:
-  #     - pgadmin-data:/var/lib/pgadmin
-  
-  # backend:
-  #   image: wilczekdocker/cinema-backend:latest
-  #   container_name: cinema-backend
-  #   environment:
-  #     SPRING_DATASOURCE_URL: jdbc:mysql://cinema-db:3306/cinema-db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-  #     SPRING_DATASOURCE_USERNAME: username
-  #     SPRING_DATASOURCE_PASSWORD: password
-  #     SPRING_DATASOURCE_DRIVER-CLASS-NAME: com.mysql.cj.jdbc.Driver
-  #   ports:
-  #     - "8080:8080"
-  #   command: sh -c "sleep 15 && java -jar /app/backend-0.0.1-SNAPSHOT.jar"
+  backend:
+    image: wilczekdocker/cinema-server:latest
+    container_name: cinema-server
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/cinema-db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root_password
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
+      # SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      # SPRING_SQL_INIT_MODE: always
+      # SPRING_SQL_INIT_DATA_LOCATIONS: classpath:data.sql
+      # CINEMA_APP_JWT_COOKIE_NAME: cinema-server
+      # CINEMA_APP_JWT_SECRET: mA/RnXfOFAfLVAX7MnZxY8SXWMxLtxS1bkVQBL0GFzw=
+      # CINEMA_APP_JWT_EXPIRATION_MS: 86400000
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    command: sh -c "sleep 15 && java -jar /app/backend-0.0.1-SNAPSHOT.jar"
 
 volumes:
-  # pgadmin-data:
   cinema-db:
