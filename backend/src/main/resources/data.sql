@@ -1,85 +1,109 @@
--- Tworzenie tabel
-
-CREATE TABLE roles (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL
+-- Create tables
+CREATE TABLE Cinemas (
+    CinemaID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) UNIQUE NOT NULL
 );
 
-CREATE TABLE users (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    email VARCHAR(255) NOT NULL,
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL
+CREATE TABLE Rooms (
+    RoomID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    CinemaID INT UNSIGNED NOT NULL,
+    RoomName VARCHAR(50),
+    TotalSeats INT NOT NULL,
+    FOREIGN KEY (CinemaID) REFERENCES Cinemas(CinemaID) ON DELETE CASCADE
 );
 
-CREATE TABLE user_roles (
-    user_id BIGINT,
-    role_id BIGINT,
-    PRIMARY KEY (user_id, role_id),
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (role_id) REFERENCES roles(id)
+CREATE TABLE Seats (
+    SeatID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    RoomID INT UNSIGNED NOT NULL,
+    RowNumber INT NOT NULL,
+    ColumnNumber INT NOT NULL,
+    SeatType VARCHAR(20) NOT NULL CHECK (SeatType IN ('POJEDYNCZE', 'PODWÓJNE', 'DLA_NIEPEŁNOSPRAWNYCH', 'INNE')),
+    PriceMultiplier DECIMAL(3, 2) NOT NULL,
+    FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID) ON DELETE CASCADE
 );
 
-CREATE TABLE movies (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    length_in_mins INT NOT NULL,
-    director VARCHAR(255) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    photo_url VARCHAR(255)
+CREATE TABLE Movies (
+    MovieID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(200) UNIQUE NOT NULL,
+    DurationMinutes INT NOT NULL,
+    AgeRestriction INT,
+    PremiereDate DATE
 );
 
-CREATE TABLE cinema_halls (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    rows_number INT NOT NULL,
-    seats_in_rows INT NOT NULL
+CREATE TABLE Shows (
+    ShowID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    MovieID INT UNSIGNED NOT NULL,
+    RoomID INT UNSIGNED NOT NULL,
+    StartTime TIMESTAMP NOT NULL,
+    EndTime TIMESTAMP NOT NULL,
+    FOREIGN KEY (MovieID) REFERENCES Movies(MovieID) ON DELETE CASCADE,
+    FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID) ON DELETE CASCADE
 );
 
-CREATE TABLE screenings (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    movie_id BIGINT,
-    cinema_hall_id BIGINT,
-    date_of_beginning TIMESTAMP,
-    FOREIGN KEY (movie_id) REFERENCES movies(id),
-    FOREIGN KEY (cinema_hall_id) REFERENCES cinema_halls(id)
+CREATE TABLE Users (
+    UserID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    Role VARCHAR(20) NOT NULL CHECK (Role IN ('GOŚĆ', 'KLIENT', 'BILETER', 'ADMINISTRATOR')),
+    Name VARCHAR(50) NOT NULL,
+    Email VARCHAR(100) UNIQUE,
+    PasswordHash VARCHAR(255),
+    LoyaltyPoints INT DEFAULT 0
 );
 
-CREATE TABLE tickets (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    roww_number INT NOT NULL,
-    seat_number INT NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    screening_id BIGINT,
-    FOREIGN KEY (screening_id) REFERENCES screenings(id)
+CREATE TABLE Tickets (
+    TicketID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    ShowID INT UNSIGNED NOT NULL,
+    SeatID INT UNSIGNED NOT NULL,
+    UserID INT UNSIGNED,
+    Status VARCHAR(20) NOT NULL CHECK (Status IN ('WAŻNY', 'NIEWAŻNY', 'SKASOWANY')),
+    TicketCode CHAR(9) UNIQUE NOT NULL,
+    Price DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (ShowID) REFERENCES Shows(ShowID) ON DELETE CASCADE,
+    FOREIGN KEY (SeatID) REFERENCES Seats(SeatID) ON DELETE CASCADE,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
--- Wstawianie danych
+CREATE TABLE Payments (
+    PaymentID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    UserID INT UNSIGNED NOT NULL,
+    Status VARCHAR(20) NOT NULL CHECK (Status IN ('ZREALIZOWANA', 'NIEZREALIZOWANA', 'ANULOWANA')),
+    Amount DECIMAL(10, 2) NOT NULL,
+    PaymentDate TIMESTAMP,
+    TicketID INT UNSIGNED NOT NULL,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    FOREIGN KEY (TicketID) REFERENCES Tickets(TicketID)
+);
 
-INSERT INTO roles (name) VALUES ('ROLE_TICKET_COLLECTOR');
+-- Insert sample data
+INSERT INTO Cinemas (Name) 
+VALUES ('Cinema City Wrocław');
 
-INSERT INTO users (email, first_name, last_name, password)
-VALUES ('user@example.com', 'Jan', 'Kowalski', '$2a$10$MA5syQTfeQ1We/rgdIpofuR9gAUqKUb28O5HmYZ3grWA58IxYI3O.');
+INSERT INTO Rooms (CinemaID, RoomName, TotalSeats) 
+VALUES 
+(1, 'Sala 1', 100), 
+(1, 'Sala 2', 150);
 
-INSERT INTO user_roles (user_id, role_id) VALUES (1, 1);
+INSERT INTO Seats (RoomID, RowNumber, ColumnNumber, SeatType, PriceMultiplier) 
+VALUES 
+(1, 1, 1, 'POJEDYNCZE', 1.0),
+(1, 1, 2, 'PODWÓJNE', 1.5);
 
-INSERT INTO movies (length_in_mins, director, title, description, photo_url)
-VALUES
-    (120, 'Peter Jackson', 'The Lord of the Rings: The Fellowship of the Ring (2001)', 'A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.', 'https://m.media-amazon.com/images/M/MV5BN2EyZjM3NzUtNWUzMi00MTgxLWI0NTctMzY4M2VlOTdjZWRiXkEyXkFqcGdeQXVyNDUzOTQ5MjY@._V1_FMjpg_UX1000_.jpg'),
-    (140, 'Derek Cianfrance', 'The Place Beyond the Pines (2012)', 'Two men and their sons must deal with the unforeseen consequences of their actions.', 'https://m.media-amazon.com/images/M/MV5BMjc1OTEwNjU4N15BMl5BanBnXkFtZTcwNzUzNDIwOQ@@._V1_FMjpg_UX1000_.jpg'),
-    (166, 'Denis Villeneuve', 'Dune: Part Two (2024)', 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.', 'https://m.media-amazon.com/images/M/MV5BN2QyZGU4ZDctOWMzMy00NTc5LThlOGQtODhmNDI1NmY5YzAwXkEyXkFqcGdeQXVyMDM2NDM2MQ@@._V1_.jpg');
+INSERT INTO Movies (Title, DurationMinutes, AgeRestriction, PremiereDate) 
+VALUES 
+('Incepcja', 148, 13, '2010-07-16');
 
-INSERT INTO cinema_halls (name, rows_number, seats_in_rows)
-VALUES
-    ('Hall A', 8, 20),
-    ('Hall B', 10, 15),
-    ('Hall C', 7, 10);
+INSERT INTO Shows (MovieID, RoomID, StartTime, EndTime) 
+VALUES 
+(1, 1, '2024-12-15 18:00:00', '2024-12-15 20:30:00');
 
-INSERT INTO screenings (movie_id, cinema_hall_id, date_of_beginning)
-VALUES
-    (1, 1, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 3 HOUR)),
-    (1, 2, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 5 HOUR)),
-    (2, 3, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 8 HOUR)),
-    (3, 3, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 8 DAY)),
-    (1, 3, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 9 DAY));
+INSERT INTO Users (Role, Name, Email, PasswordHash, LoyaltyPoints) 
+VALUES 
+('KLIENT', 'Jan Kowalski', 'jan.kowalski@example.com', 'hashedpassword', 50),
+('ADMINISTRATOR', 'Anna Nowak', 'anna.nowak@example.com', 'hashedpassword', 0);
+
+INSERT INTO Tickets (ShowID, SeatID, UserID, Status, TicketCode, Price) 
+VALUES 
+(1, 1, 1, 'WAŻNY', '123456789', 30.00);
+
+INSERT INTO Payments (UserID, Status, Amount, PaymentDate, TicketID) 
+VALUES 
+(1, 'ZREALIZOWANA', 30.00, '2024-12-10 15:00:00', 1);

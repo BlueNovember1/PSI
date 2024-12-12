@@ -1,0 +1,26 @@
+services:
+  ticket-db-dev:
+    image: mysql:latest
+    container_name: ticket-db-dev
+    environment:
+      MYSQL_DATABASE: cinema-db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - db_data_dev:/var/lib/mysql
+      - ./ticket_db_backup.sql:/docker-entrypoint-initdb.d/ticket_db_backup.sql
+
+  ticket-db-prod:
+    image: mysql:latest
+    container_name: ticket-db-prod
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - db_data_prod:/var/lib/mysql
+      - ./ticket_db_backup.sql:/docker-entrypoint-initdb.d/ticket_db_backup.sql
+    profiles:
+      - production

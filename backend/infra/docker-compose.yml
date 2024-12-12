@@ -1,0 +1,28 @@
+services:
+  caddy:
+      image: caddy:latest
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ./Caddyfile:/etc/caddy/Caddyfile
+        - caddy_data:/data
+        - caddy_config:/config
+
+  keycloak:
+    image: jboss/keycloak:latest
+    environment:
+      DB_VENDOR: h2
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    labels:
+      - "caddy.keycloak.localhost"
+      - "caddy.reverse_proxy=/auth/* http://keycloak:8080"
+
+volumes:
+  db_data_dev:
+  db_data_prod:
+  caddy_data:
+  caddy_config:
