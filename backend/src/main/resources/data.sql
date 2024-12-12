@@ -1,10 +1,10 @@
 -- Create tables
-CREATE TABLE Cinemas (
+CREATE TABLE IF NOT EXISTS Cinemas (
     CinemaID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100) UNIQUE NOT NULL
 );
 
-CREATE TABLE Rooms (
+CREATE TABLE IF NOT EXISTS Rooms (
     RoomID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     CinemaID INT UNSIGNED NOT NULL,
     RoomName VARCHAR(50),
@@ -12,17 +12,17 @@ CREATE TABLE Rooms (
     FOREIGN KEY (CinemaID) REFERENCES Cinemas(CinemaID) ON DELETE CASCADE
 );
 
-CREATE TABLE Seats (
+CREATE TABLE IF NOT EXISTS Seats (
     SeatID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     RoomID INT UNSIGNED NOT NULL,
     RowNumber INT NOT NULL,
     ColumnNumber INT NOT NULL,
-    SeatType VARCHAR(20) NOT NULL CHECK (SeatType IN ('POJEDYNCZE', 'PODWÓJNE', 'DLA_NIEPEŁNOSPRAWNYCH', 'INNE')),
+    SeatType VARCHAR(20) NOT NULL,
     PriceMultiplier DECIMAL(3, 2) NOT NULL,
     FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID) ON DELETE CASCADE
 );
 
-CREATE TABLE Movies (
+CREATE TABLE IF NOT EXISTS Movies (
     MovieID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     Title VARCHAR(200) UNIQUE NOT NULL,
     DurationMinutes INT NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE Movies (
     PremiereDate DATE
 );
 
-CREATE TABLE Shows (
+CREATE TABLE IF NOT EXISTS Shows (
     ShowID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     MovieID INT UNSIGNED NOT NULL,
     RoomID INT UNSIGNED NOT NULL,
@@ -40,21 +40,21 @@ CREATE TABLE Shows (
     FOREIGN KEY (RoomID) REFERENCES Rooms(RoomID) ON DELETE CASCADE
 );
 
-CREATE TABLE Users (
+CREATE TABLE IF NOT EXISTS Users (
     UserID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    Role VARCHAR(20) NOT NULL CHECK (Role IN ('GOŚĆ', 'KLIENT', 'BILETER', 'ADMINISTRATOR')),
+    Role VARCHAR(20) NOT NULL,
     Name VARCHAR(50) NOT NULL,
     Email VARCHAR(100) UNIQUE,
     PasswordHash VARCHAR(255),
     LoyaltyPoints INT DEFAULT 0
 );
 
-CREATE TABLE Tickets (
+CREATE TABLE IF NOT EXISTS Tickets (
     TicketID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     ShowID INT UNSIGNED NOT NULL,
     SeatID INT UNSIGNED NOT NULL,
     UserID INT UNSIGNED,
-    Status VARCHAR(20) NOT NULL CHECK (Status IN ('WAŻNY', 'NIEWAŻNY', 'SKASOWANY')),
+    Status ENUM('WAŻNY', 'NIEWAŻNY', 'SKASOWANY') NOT NULL,
     TicketCode CHAR(9) UNIQUE NOT NULL,
     Price DECIMAL(10, 2) NOT NULL,
     FOREIGN KEY (ShowID) REFERENCES Shows(ShowID) ON DELETE CASCADE,
@@ -62,10 +62,10 @@ CREATE TABLE Tickets (
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
-CREATE TABLE Payments (
+CREATE TABLE IF NOT EXISTS Payments (
     PaymentID INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     UserID INT UNSIGNED NOT NULL,
-    Status VARCHAR(20) NOT NULL CHECK (Status IN ('ZREALIZOWANA', 'NIEZREALIZOWANA', 'ANULOWANA')),
+    Status ENUM('ZREALIZOWANA', 'NIEZREALIZOWANA', 'ANULOWANA') NOT NULL,
     Amount DECIMAL(10, 2) NOT NULL,
     PaymentDate TIMESTAMP,
     TicketID INT UNSIGNED NOT NULL,
@@ -75,35 +75,45 @@ CREATE TABLE Payments (
 
 -- Insert sample data
 INSERT INTO Cinemas (Name) 
-VALUES ('Cinema City Wrocław');
+SELECT 'Cinema City Wrocław' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Cinemas WHERE Name = 'Cinema City Wrocław');
 
 INSERT INTO Rooms (CinemaID, RoomName, TotalSeats) 
-VALUES 
-(1, 'Sala 1', 100), 
-(1, 'Sala 2', 150);
+SELECT 1, 'Sala 1', 100 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Rooms WHERE CinemaID = 1 AND RoomName = 'Sala 1');
+
+INSERT INTO Rooms (CinemaID, RoomName, TotalSeats) 
+SELECT 1, 'Sala 2', 150 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Rooms WHERE CinemaID = 1 AND RoomName = 'Sala 2');
 
 INSERT INTO Seats (RoomID, RowNumber, ColumnNumber, SeatType, PriceMultiplier) 
-VALUES 
-(1, 1, 1, 'POJEDYNCZE', 1.0),
-(1, 1, 2, 'PODWÓJNE', 1.5);
+SELECT 1, 1, 1, 'POJEDYNCZE', 1.0 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Seats WHERE RoomID = 1 AND RowNumber = 1 AND ColumnNumber = 1);
+
+INSERT INTO Seats (RoomID, RowNumber, ColumnNumber, SeatType, PriceMultiplier) 
+SELECT 1, 1, 2, 'PODWÓJNE', 1.5 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Seats WHERE RoomID = 1 AND RowNumber = 1 AND ColumnNumber = 2);
 
 INSERT INTO Movies (Title, DurationMinutes, AgeRestriction, PremiereDate) 
-VALUES 
-('Incepcja', 148, 13, '2010-07-16');
+SELECT 'Incepcja', 148, 13, '2010-07-16' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Movies WHERE Title = 'Incepcja');
 
 INSERT INTO Shows (MovieID, RoomID, StartTime, EndTime) 
-VALUES 
-(1, 1, '2024-12-15 18:00:00', '2024-12-15 20:30:00');
+SELECT 1, 1, '2024-12-15 18:00:00', '2024-12-15 20:30:00' FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Shows WHERE MovieID = 1 AND RoomID = 1 AND StartTime = '2024-12-15 18:00:00');
 
 INSERT INTO Users (Role, Name, Email, PasswordHash, LoyaltyPoints) 
-VALUES 
-('KLIENT', 'Jan Kowalski', 'jan.kowalski@example.com', 'hashedpassword', 50),
-('ADMINISTRATOR', 'Anna Nowak', 'anna.nowak@example.com', 'hashedpassword', 0);
+SELECT 'KLIENT', 'Jan Kowalski', 'jan.kowalski@example.com', 'hashedpassword', 50 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Users WHERE Email = 'jan.kowalski@example.com');
+
+INSERT INTO Users (Role, Name, Email, PasswordHash, LoyaltyPoints) 
+SELECT 'ADMINISTRATOR', 'Anna Nowak', 'anna.nowak@example.com', 'hashedpassword', 0 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Users WHERE Email = 'anna.nowak@example.com');
 
 INSERT INTO Tickets (ShowID, SeatID, UserID, Status, TicketCode, Price) 
-VALUES 
-(1, 1, 1, 'WAŻNY', '123456789', 30.00);
+SELECT 1, 1, 1, 'WAŻNY', '123456789', 30.00 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Tickets WHERE TicketCode = '123456789');
 
 INSERT INTO Payments (UserID, Status, Amount, PaymentDate, TicketID) 
-VALUES 
-(1, 'ZREALIZOWANA', 30.00, '2024-12-10 15:00:00', 1);
+SELECT 1, 'ZREALIZOWANA', 30.00, '2024-12-10 15:00:00', 1 FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM Payments WHERE UserID = 1 AND TicketID = 1 AND PaymentDate = '2024-12-10 15:00:00');

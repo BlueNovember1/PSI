@@ -1,12 +1,14 @@
+version: '3.8'
+
 services:
   mysql:
     image: mysql:latest
     container_name: cinema-db
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: cinema-db
-      MYSQL_USER: username
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -17,22 +19,22 @@ services:
     image: wilczekdocker/cinema-server:latest
     container_name: cinema-server
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/cinema-db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root_password
-      SPRING_DATASOURCE_DRIVER-CLASS-NAME: com.mysql.cj.jdbc.Driver
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
-      # SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      # SPRING_SQL_INIT_MODE: always
-      # SPRING_SQL_INIT_DATA_LOCATIONS: classpath:data.sql
-      # CINEMA_APP_JWT_COOKIE_NAME: cinema-server
-      # CINEMA_APP_JWT_SECRET: mA/RnXfOFAfLVAX7MnZxY8SXWMxLtxS1bkVQBL0GFzw=
-      # CINEMA_APP_JWT_EXPIRATION_MS: 86400000
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: ${SPRING_DATASOURCE_DRIVER-CLASS-NAME}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+      SPRING_SQL_INIT_MODE: ${SPRING_SQL_INIT_MODE}
+      SPRING_SQL_INIT_DATA_LOCATIONS: ${SPRING_SQL_INIT_DATA_LOCATIONS}
+      CINEMA_APP_JWT_COOKIE_NAME: ${CINEMA_APP_JWT_COOKIE_NAME}
+      CINEMA_APP_JWT_SECRET: ${CINEMA_APP_JWT_SECRET}
+      CINEMA_APP_JWT_EXPIRATION_MS: ${CINEMA_APP_JWT_EXPIRATION_MS}
     ports:
       - "8080:8080"
     depends_on:
       - mysql
-    command: sh -c "sleep 15 && java -jar /app/backend-0.0.1-SNAPSHOT.jar"
+    command: sh -c "sleep 10 && java -jar /app/backend-0.0.1-SNAPSHOT.jar"
 
 volumes:
   cinema-db:
